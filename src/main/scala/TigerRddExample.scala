@@ -68,7 +68,21 @@ object TigerRddExample {
     System.out.println(result.count())
     val queryEnd = System.currentTimeMillis()
     val queryTime = queryEnd - queryStart
-    println(s"Query time $queryTime")
+    println(s"Run1 $queryTime")
+
+    val start2 = System.currentTimeMillis()
+    val res2 = JoinQuery.SpatialJoinQuery(arealmRDD, areaWaterRDD, usingIndex, spatialPredicate)
+    System.out.println(result.count())
+    val end2 = System.currentTimeMillis()
+    val querytime2 = end2 - start2
+    println(s"Run2 $querytime2")
+
+    val start3 = System.currentTimeMillis()
+    val res3 = JoinQuery.SpatialJoinQuery(arealmRDD, areaWaterRDD, usingIndex, spatialPredicate)
+    System.out.println(result.count())
+    val end3 = System.currentTimeMillis()
+    val querytime3 = end3 - start3
+    println(s"Run3 $querytime3")
   }
 }
 

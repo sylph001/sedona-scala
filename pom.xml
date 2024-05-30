@@ -62,6 +62,18 @@
             <version>${sedona.version}</version>
             <scope>${sedona.scope}</scope>
         </dependency>
+        <!-- sedona-shaded -->
+        <dependency>
+            <groupId>org.apache.sedona</groupId>
+            <artifactId>sedona-spark-shaded-3.4_2.12</artifactId>
+            <version>1.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.datasyslab</groupId>
+            <artifactId>geotools-wrapper</artifactId>
+            <version>1.6.0-28.2</version>
+        </dependency>
+        <!-- End of sedona shaded -->
         <!--The following GeoTools dependencies use GNU Lesser General Public License and thus are excluded from the binary distribution-->
         <!-- Users have to include them by themselves manually -->
         <!-- See https://www.apache.org/legal/resolved.html#category-x -->
