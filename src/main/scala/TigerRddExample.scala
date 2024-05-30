@@ -30,8 +30,10 @@ import java.awt.Color
 
 object TigerRddExample {
 
-  val arealmFileLocation = resourceFolder+"tiger/arealm"
-  val arealWaterFileLocation = resourceFolder+"tiger/areawater"
+  //val arealmFileLocation = resourceFolder+"tiger/arealm"
+  val arealmFileLocation = "hdfs://10.32.0.1:/home/sedona/tiger/shp/arealm"
+  //val arealWaterFileLocation = resourceFolder+"tiger/areawater"
+  val arealWaterFileLocation = "hdfs://10.32.0.1:/home/sedona/tiger/shp/areawater"
 
   def runTigerQuery(sedona: SparkSession): Unit =
   {

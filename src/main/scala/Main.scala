@@ -31,7 +31,8 @@ object Main extends App {
   Logger.getRootLogger().setLevel(Level.ALL)
 
   val config = SedonaContext.builder().appName("SedonaSQL-demo")
-    .master("local[*]") // Please comment out this when use it on a cluster
+    //.master("local[*]") // Please comment out this when use it on a cluster
+    .master("spark://10.32.0.1:7077") // Please comment out this when use it on a cluster
     .config("spark.driver.host", "127.0.0.1")
     .config("spark.driver.bindAddress", "127.0.0.1")
     .config("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName)
