@@ -14,6 +14,7 @@
  */
 
 import Main.resourceFolder
+import com.amazonaws.thirdparty.joda.time.format.PeriodFormat
 import org.apache.sedona.core.enums.{GridType, IndexType}
 import org.apache.sedona.core.formatMapper.shapefileParser.ShapefileReader
 import org.apache.sedona.core.spatialOperator.{JoinQuery, SpatialPredicate}
@@ -45,17 +46,29 @@ object TigerRddExample {
     val spatialPredicate = SpatialPredicate.TOUCHES // Only return gemeotries fully covered by each query window in queryWindowRDD
     arealmRDD.analyze()
     arealmRDD.spatialPartitioning(GridType.KDBTREE)
+    //println("Index Build Time:")
+    //+println(elapsed.toPeriod.toString(PeriodFormat.getDefault)
 
     areaWaterRDD.analyze()
     areaWaterRDD.spatialPartitioning(arealmRDD.getPartitioner)
 
+    val indexStartTime = System.currentTimeMillis()
+    println(s"Start: $indexStartTime")
     val buildOnSpatialPartitionedRDD = true // Set to TRUE only if run join query
     val usingIndex = true
     areaWaterRDD.buildIndex(IndexType.QUADTREE, buildOnSpatialPartitionedRDD)
     areaWaterRDD.indexedRDD = areaWaterRDD.indexedRDD.cache()
+    val indexEndTime = System.currentTimeMillis()
+    println(s"Start: $indexEndTime")
+    val indexTime = indexEndTime - indexStartTime
+    println("Index build time: "+indexTime)
 
+    val queryStart = System.currentTimeMillis()
     val result = JoinQuery.SpatialJoinQuery(arealmRDD, areaWaterRDD, usingIndex, spatialPredicate)
     System.out.println(result.count())
+    val queryEnd = System.currentTimeMillis()
+    val queryTime = queryEnd - queryStart
+    println(s"Query time $queryTime")
   }
 }
 
