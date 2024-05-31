@@ -41,25 +41,7 @@ object Main extends App {
 
   SedonaVizRegistrator.registerAll(sedona)
 
-	val resourceFolder = System.getProperty("user.dir")+"/src/test/resources/"
-
-//  testPredicatePushdownAndRangeJonQuery(sedona)
-//  testDistanceJoinQuery(sedona)
-//  testAggregateFunction(sedona)
-//  testShapefileConstructor(sedona)
-//  testRasterIOAndMapAlgebra(sedona)
-//
-//  visualizeSpatialColocation(sedona)
-//  calculateSpatialColocation(sedona)
-//
-//  buildScatterPlot(sedona)
-//  buildHeatMap(sedona)
-//  buildChoroplethMap(sedona)
-//  parallelFilterRenderNoStitch(sedona)
-//  sqlApiVisualization(sedona)
-
-
-  runTigerQuery(sedona, TigerRddExample.mapQueries(2))
+  runTigerQuery(sedona, TigerRddExample.mapQueries(2), 2)
   System.out.println("All SedonaSQL DEMOs passed!")
 
 }

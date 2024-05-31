@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-import Main.resourceFolder
+//import Main.resourceFolder
 import com.amazonaws.services.logs.model.QueryInfo
 import com.amazonaws.thirdparty.joda.time.format.PeriodFormat
 import org.apache.sedona.core.enums.{GridType, IndexType}
 import org.apache.sedona.core.formatMapper.shapefileParser.ShapefileReader
 import org.apache.sedona.core.spatialOperator.{JoinQuery, SpatialPredicate}
+import org.apache.sedona.core.spatialOperator.
 import org.apache.sedona.core.spatialRDD.{CircleRDD, SpatialRDD}
 import org.apache.sedona.sql.utils.Adapter
 import org.apache.sedona.viz.core.{ImageGenerator, RasterOverlayOperator}
@@ -55,19 +56,25 @@ object TigerRddExample {
 
   val mapQueries = Map( //:Map[Int, List[String]] = Map[Int, List[String]]()
     1 -> List(edgesFileLocation, arealmFileLocation, "INTERSECTS"),
-    2 -> List(arealmFileLocation, arealWaterFileLocation, "TOUCHES")
+    2 -> List(arealmFileLocation, arealWaterFileLocation, "TOUCHES"),
     3 -> List(edgesFileLocation, arealmFileLocation, "CROSSES"),
     4 -> List(edgesFileLocation, edgesFileLocation, "CROSSES"),
-    5 -> List(edgesFileLocation, arealWaterFileLocation, "CROSSES")
+    5 -> List(edgesFileLocation, arealWaterFileLocation, "CROSSES"),
+    6 -> List(arealWaterFileLocation, arealWaterFileLocation, "OVERLAPS"),
+    7 -> List(arealmFileLocation, arealmFileLocation, "OVERLAPS")
   )
 
   val mapPredicates = Map( //:Map[String, SpatialPredicate] = Map[String, SpatialPredicate]()
     "INTERSECTS" -> SpatialPredicate.INTERSECTS,
     "TOUCHES" -> SpatialPredicate.TOUCHES,
-    "CROSSES" -> SpatialPredicate.CROSSES
+    "CROSSES" -> SpatialPredicate.CROSSES,
+    "OVERLAPS" -> SpatialPredicate.OVERLAPS,
+    "WITHIN" -> SpatialPredicate.WITHIN
+    //"DISTANCE" -> SpatialPredicate.DISTANCE,
+    //"DWITHIN" -> SpatialPredicate.DWITHIN
   )
 
-  def runTigerQuery(sedona: SparkSession, QueryInfo: List[String]): Unit =
+  def runTigerQuery(sedona: SparkSession, QueryInfo: List[String], HotRunTimes: Int): Unit =
   {
     var buildRDD = new SpatialRDD[Geometry]()
     var probeRDD = new SpatialRDD[Geometry]()
@@ -88,62 +95,45 @@ object TigerRddExample {
     buildRDD.buildIndex(IndexType.QUADTREE, switchBuildOnPartition)
     buildRDD.indexedRDD = buildRDD.indexedRDD.cache()
     val endIndexSetting = System.currentTimeMillis()
+    val timeIndexSetting = endIndexSetting - startIndexSetting
 
-    val res = JoinQuery.SpatialJoinQuery(buildRDD, probeRDD, switchUseIndex, mapPredicates(QueryInfo(2)))
-    println("RUN $cnt result: ")
-    println(res.count())
-  }
+    // Cold Run
+    val startCold = System.currentTimeMillis()
+    val resCold = JoinQuery.SpatialJoinQuery(buildRDD, probeRDD, switchUseIndex, mapPredicates(QueryInfo(2)))
+    val endCold = System.currentTimeMillis()
+    val timeCold= endCold - startCold
 
-  def runTigerQueryOrig(sedona: SparkSession): Unit =
-  {
+    // Hod Run
+    val listTimeHotRun = new ListBuffer[Long]()
+    val listResultHotRun = new ListBuffer[Long]()
+    val sumTimeHotRun = 0.0
+    for (n <- List.range(0, HotRunTimes)) {
+      val startHot = System.currentTimeMillis()
+      println(s"Run $n: Hot Start $startHot")
+      val resHot = JoinQuery.SpatialJoinQuery(buildRDD, probeRDD, switchUseIndex, mapPredicates(QueryInfo(2)))
+      val endHot = System.currentTimeMillis()
+      println(s"Run $n: Hot End $endHot")
+      val timeHot= endHot - startHot
+      listTimeHotRun += timeHot
+      listResultHotRun += resHot.count()
+      //sumTimeHotRun = sumTimeHotRun + timeHot
+    }
+    val sumTime = listTimeHotRun.sum
+    val avgHotTime = sumTime / HotRunTimes
 
-    // Prepare NYC area landmarks which includes airports, museums, colleges, hospitals
-    var arealmRDD = new SpatialRDD[Geometry]()
-    var areaWaterRDD = new SpatialRDD[Geometry]()
 
-    arealmRDD = ShapefileReader.readToGeometryRDD(sedona.sparkContext, arealmFileLocation)
-    areaWaterRDD = ShapefileReader.readToGeometryRDD(sedona.sparkContext, arealWaterFileLocation)
+    val strTag = "$$RESULT$$  "
+    println(s"$strTag  User Defined Hot Run Times: $HotRunTimes\n")
+    println(s"$strTag  IndexSetting Time: ${timeIndexSetting}")
+    println(s"$strTag  Cold Run Time: ${timeCold}")
 
-    val spatialPredicate = SpatialPredicate.TOUCHES // Only return gemeotries fully covered by each query window in queryWindowRDD
-    arealmRDD.analyze()
-    arealmRDD.spatialPartitioning(GridType.KDBTREE)
-    //println("Index Build Time:")
-    //+println(elapsed.toPeriod.toString(PeriodFormat.getDefault)
-
-    areaWaterRDD.analyze()
-    areaWaterRDD.spatialPartitioning(arealmRDD.getPartitioner)
-
-    val indexStartTime = System.currentTimeMillis()
-    println(s"Start: $indexStartTime")
-    val buildOnSpatialPartitionedRDD = true // Set to TRUE only if run join query
-    val usingIndex = true
-    areaWaterRDD.buildIndex(IndexType.QUADTREE, buildOnSpatialPartitionedRDD)
-    areaWaterRDD.indexedRDD = areaWaterRDD.indexedRDD.cache()
-    val indexEndTime = System.currentTimeMillis()
-    println(s"Start: $indexEndTime")
-    val indexTime = indexEndTime - indexStartTime
-    println("Index build time: "+indexTime)
-
-    val queryStart = System.currentTimeMillis()
-    val result = JoinQuery.SpatialJoinQuery(arealmRDD, areaWaterRDD, usingIndex, spatialPredicate)
-    System.out.println(result.count())
-    val queryEnd = System.currentTimeMillis()
-    val queryTime = queryEnd - queryStart
-    println(s"Run1 $queryTime")
-
-    val start2 = System.currentTimeMillis()
-    val res2 = JoinQuery.SpatialJoinQuery(arealmRDD, areaWaterRDD, usingIndex, spatialPredicate)
-    System.out.println(result.count())
-    val end2 = System.currentTimeMillis()
-    val querytime2 = end2 - start2
-    println(s"Run2 $querytime2")
-
-    val start3 = System.currentTimeMillis()
-    val res3 = JoinQuery.SpatialJoinQuery(arealmRDD, areaWaterRDD, usingIndex, spatialPredicate)
-    System.out.println(result.count())
-    val end3 = System.currentTimeMillis()
-    val querytime3 = end3 - start3
-    println(s"Run3 $querytime3")
+    println(s"")
+    for (n <- List.range(0, HotRunTimes)) {
+      println(s"$strTag  RUN $n Result: ${listResultHotRun(n)}")
+      println(s"$strTag  RUN $n Time: ${listTimeHotRun(n)}")
+    }
+    println(s"")
+    println(s"$strTag  Avg Hot Run Time: $avgHotTime")
   }
 
 }
