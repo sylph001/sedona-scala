@@ -41,6 +41,8 @@ object Main extends App {
 
   SedonaVizRegistrator.registerAll(sedona)
 
+  val resourceFolder = System.getProperty("user.dir")+"/src/test/resources/"
+
   runTigerQuery(sedona, TigerRddExample.mapQueries(2), 2)
   System.out.println("All SedonaSQL DEMOs passed!")
 

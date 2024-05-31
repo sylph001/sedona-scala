@@ -14,12 +14,12 @@
  */
 
 //import Main.resourceFolder
+import scala.collection.mutable.ListBuffer
 import com.amazonaws.services.logs.model.QueryInfo
 import com.amazonaws.thirdparty.joda.time.format.PeriodFormat
 import org.apache.sedona.core.enums.{GridType, IndexType}
 import org.apache.sedona.core.formatMapper.shapefileParser.ShapefileReader
 import org.apache.sedona.core.spatialOperator.{JoinQuery, SpatialPredicate}
-import org.apache.sedona.core.spatialOperator.
 import org.apache.sedona.core.spatialRDD.{CircleRDD, SpatialRDD}
 import org.apache.sedona.sql.utils.Adapter
 import org.apache.sedona.viz.core.{ImageGenerator, RasterOverlayOperator}
