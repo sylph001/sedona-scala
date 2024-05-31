@@ -100,6 +100,7 @@ object TigerRddExample {
     // Cold Run
     val startCold = System.currentTimeMillis()
     val resCold = JoinQuery.SpatialJoinQuery(buildRDD, probeRDD, switchUseIndex, mapPredicates(QueryInfo(2)))
+    val resultCold = resCold.count()
     val endCold = System.currentTimeMillis()
     val timeCold= endCold - startCold
 
@@ -110,12 +111,15 @@ object TigerRddExample {
     for (n <- List.range(0, HotRunTimes)) {
       val startHot = System.currentTimeMillis()
       println(s"Run $n: Hot Start $startHot")
+
+      // Query
       val resHot = JoinQuery.SpatialJoinQuery(buildRDD, probeRDD, switchUseIndex, mapPredicates(QueryInfo(2)))
+      listResultHotRun += resHot.count()
+
       val endHot = System.currentTimeMillis()
       println(s"Run $n: Hot End $endHot")
       val timeHot= endHot - startHot
       listTimeHotRun += timeHot
-      listResultHotRun += resHot.count()
       //sumTimeHotRun = sumTimeHotRun + timeHot
     }
     val sumTime = listTimeHotRun.sum
@@ -125,6 +129,7 @@ object TigerRddExample {
     val strTag = "$$RESULT$$  "
     println(s"$strTag  User Defined Hot Run Times: $HotRunTimes\n")
     println(s"$strTag  IndexSetting Time: ${timeIndexSetting}")
+    println(s"$strTag  Cold Run Result: ${resultCold}")
     println(s"$strTag  Cold Run Time: ${timeCold}")
 
     println(s"")

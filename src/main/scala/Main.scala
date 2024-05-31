@@ -43,7 +43,12 @@ object Main extends App {
 
   val resourceFolder = System.getProperty("user.dir")+"/src/test/resources/"
 
-  runTigerQuery(sedona, TigerRddExample.mapQueries(2), 2)
+  /**
+  for (n <- List.range(1,8)) {
+    runTigerQuery(sedona, TigerRddExample.mapQueries(n), 3)
+  }
+  */
+  runTigerQuery(sedona, TigerRddExample.mapQueries(3), 3)
   System.out.println("All SedonaSQL DEMOs passed!")
 
 }
