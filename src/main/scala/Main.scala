@@ -59,7 +59,7 @@ object Main extends App {
 //  sqlApiVisualization(sedona)
 
 
-  runTigerQuery(sedona)
+  runTigerQuery(sedona, TigerRddExample.mapQueries(2))
   System.out.println("All SedonaSQL DEMOs passed!")
 
 }
