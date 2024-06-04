@@ -83,7 +83,7 @@ object TigerRddExample {
     probeRDD = ShapefileReader.readToGeometryRDD(sedona.sparkContext, QueryInfo(1))
 
     buildRDD.analyze()
-    buildRDD.spatialPartitioning(GridType.KDBTREE)
+    buildRDD.spatialPartitioning(GridType.QUADTREE)
 
     probeRDD.analyze()
     probeRDD.spatialPartitioning(buildRDD.getPartitioner)

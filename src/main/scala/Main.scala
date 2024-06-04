@@ -32,11 +32,11 @@ object Main extends App {
 
   val config = SedonaContext.builder().appName("SedonaSQL-demo")
     //.master("local[*]") // Please comment out this when use it on a cluster
-    .master("spark://10.32.0.1:7077") // Please comment out this when use it on a cluster
-    .config("spark.driver.host", "127.0.0.1")
-    .config("spark.driver.bindAddress", "127.0.0.1")
+    .master("spark://9fcebbf32068:7077") // Please comment out this when use it on a cluster
+    .config("spark.driver.bindAddress", "0.0.0.0")
     .config("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName)
     .getOrCreate()
+    //.config("spark.driver.host", "127.0.0.1")
   val sedona = SedonaContext.create(config)
 
   SedonaVizRegistrator.registerAll(sedona)
@@ -48,7 +48,11 @@ object Main extends App {
     runTigerQuery(sedona, TigerRddExample.mapQueries(n), 3)
   }
   */
-  runTigerQuery(sedona, TigerRddExample.mapQueries(3), 3)
+
+  val queryNum = args(0).toInt
+  println(s"Query Num: ${queryNum}")
+  println(s"Query to Run: ${TigerRddExample.mapQueries(queryNum)}")
+  runTigerQuery(sedona, TigerRddExample.mapQueries(queryNum), 1)
   System.out.println("All SedonaSQL DEMOs passed!")
 
 }
