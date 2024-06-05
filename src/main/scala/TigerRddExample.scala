@@ -71,10 +71,10 @@ object TigerRddExample {
     7 -> List(arealmFileLocation, arealmFileLocation, "OVERLAPS"),
     8 -> List(pointlmFileLocation, arealWaterFileLocation, "WITHIN"),
     // OSM
-    4 -> List(rds_lin_uk, bld_poly_uk, "TOUCHES"),
-    4 -> List(rds_lin_uk, lwn_poly_uk, "CROSSES"),
-    4 -> List(poi_point_uk, lwn_poly_uk, "WITHIN"),
-    4 -> List(bld_poly_uk, lwn_poly_uk, "OVERLAPS")
+    9 -> List(rds_lin_uk, bld_poly_uk, "TOUCHES"),
+    10 -> List(rds_lin_uk, lwn_poly_uk, "CROSSES"),
+    11 -> List(poi_point_uk, lwn_poly_uk, "WITHIN"),
+    12 -> List(bld_poly_uk, lwn_poly_uk, "OVERLAPS")
   )
 
   val mapPredicates = Map( //:Map[String, SpatialPredicate] = Map[String, SpatialPredicate]()
