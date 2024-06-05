@@ -47,21 +47,34 @@ import java.awt.Color
 
 object TigerRddExample {
 
+  // Tiger Dataset
   //val arealmFileLocation = resourceFolder+"tiger/arealm"
   //val arealWaterFileLocation = resourceFolder+"tiger/areawater"
-  val arealmFileLocation = "hdfs://ace06:/home/sedona/tiger/shp/arealm"
-  val arealWaterFileLocation = "hdfs://ace06:/home/sedona/tiger/shp/areawater"
-  val edgesFileLocation = "hdfs://ace06:/home/sedona/tiger/shp/edges"
-  val pointlmFileLocation = "hdfs://ace06:/home/sedona/tiger/shp/pointlm"
+  val arealmFileLocation = "hdfs://9fcebbf32068:/home/sedona/tiger/shp/arealm"
+  val arealWaterFileLocation = "hdfs://9fcebbf32068:/home/sedona/tiger/shp/areawater"
+  val edgesFileLocation = "hdfs://9fcebbf32068:/home/sedona/tiger/shp/edges"
+  val pointlmFileLocation = "hdfs://9fcebbf32068:/home/sedona/tiger/shp/pointlm"
+  // OSM Dataset
+  val bld_poly_uk = "hdfs://9fcebbf32068:/home/sedona/osm/shp/bld_poly_uk"
+  val lwn_poly_uk = "hdfs://9fcebbf32068:/home/sedona/osm/shp/lwn_poly_uk"
+  val poi_point_uk = "hdfs://9fcebbf32068:/home/sedona/osm/shp/poi_point_uk"
+  val rds_lin_uk = "hdfs://9fcebbf32068:/home/sedona/osm/shp/rds_lin_uk"
 
   val mapQueries = Map( //:Map[Int, List[String]] = Map[Int, List[String]]()
+    // Tiger
     1 -> List(edgesFileLocation, arealmFileLocation, "INTERSECTS"),
     2 -> List(arealmFileLocation, arealWaterFileLocation, "TOUCHES"),
     3 -> List(edgesFileLocation, arealmFileLocation, "CROSSES"),
     4 -> List(edgesFileLocation, edgesFileLocation, "CROSSES"),
     5 -> List(edgesFileLocation, arealWaterFileLocation, "CROSSES"),
     6 -> List(arealWaterFileLocation, arealWaterFileLocation, "OVERLAPS"),
-    7 -> List(arealmFileLocation, arealmFileLocation, "OVERLAPS")
+    7 -> List(arealmFileLocation, arealmFileLocation, "OVERLAPS"),
+    8 -> List(pointlmFileLocation, arealWaterFileLocation, "WITHIN"),
+    // OSM
+    4 -> List(rds_lin_uk, bld_poly_uk, "TOUCHES"),
+    4 -> List(rds_lin_uk, lwn_poly_uk, "CROSSES"),
+    4 -> List(poi_point_uk, lwn_poly_uk, "WITHIN"),
+    4 -> List(bld_poly_uk, lwn_poly_uk, "OVERLAPS")
   )
 
   val mapPredicates = Map( //:Map[String, SpatialPredicate] = Map[String, SpatialPredicate]()

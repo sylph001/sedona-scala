@@ -52,7 +52,7 @@ object Main extends App {
   val queryNum = args(0).toInt
   println(s"Query Num: ${queryNum}")
   println(s"Query to Run: ${TigerRddExample.mapQueries(queryNum)}")
-  runTigerQuery(sedona, TigerRddExample.mapQueries(queryNum), 1)
+  runTigerQuery(sedona, TigerRddExample.mapQueries(queryNum), 2)
   System.out.println("All SedonaSQL DEMOs passed!")
 
 }
