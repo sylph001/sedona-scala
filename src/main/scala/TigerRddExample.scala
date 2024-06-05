@@ -49,10 +49,10 @@ object TigerRddExample {
 
   //val arealmFileLocation = resourceFolder+"tiger/arealm"
   //val arealWaterFileLocation = resourceFolder+"tiger/areawater"
-  val arealmFileLocation = "hdfs://10.32.0.1:/home/sedona/tiger/shp/arealm"
-  val arealWaterFileLocation = "hdfs://10.32.0.1:/home/sedona/tiger/shp/areawater"
-  val edgesFileLocation = "hdfs://10.32.0.1:/home/sedona/tiger/shp/edges"
-  val pointlmFileLocation = "hdfs://10.32.0.1:/home/sedona/tiger/shp/pointlm"
+  val arealmFileLocation = "hdfs://ace06:/home/sedona/tiger/shp/arealm"
+  val arealWaterFileLocation = "hdfs://ace06:/home/sedona/tiger/shp/areawater"
+  val edgesFileLocation = "hdfs://ace06:/home/sedona/tiger/shp/edges"
+  val pointlmFileLocation = "hdfs://ace06:/home/sedona/tiger/shp/pointlm"
 
   val mapQueries = Map( //:Map[Int, List[String]] = Map[Int, List[String]]()
     1 -> List(edgesFileLocation, arealmFileLocation, "INTERSECTS"),
