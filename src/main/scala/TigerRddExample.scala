@@ -14,6 +14,8 @@
  */
 
 //import Main.resourceFolder
+//import TigerRddExample.areawaterFileLocation
+
 import scala.collection.mutable.ListBuffer
 import com.amazonaws.services.logs.model.QueryInfo
 import com.amazonaws.thirdparty.joda.time.format.PeriodFormat
@@ -143,6 +145,87 @@ object TigerRddExample {
     println(s"$strTag  User Defined Hot Run Times: $HotRunTimes\n")
     println(s"$strTag  IndexSetting Time: ${timeIndexSetting}")
     println(s"$strTag  Cold Run Result: ${resultCold}")
+    println(s"$strTag  Cold Run Time: ${timeCold}")
+
+    println(s"")
+    for (n <- List.range(0, HotRunTimes)) {
+      println(s"$strTag  RUN $n Result: ${listResultHotRun(n)}")
+      println(s"$strTag  RUN $n Time: ${listTimeHotRun(n)}")
+    }
+    println(s"")
+    println(s"$strTag  Avg Hot Run Time: $avgHotTime")
+  }
+
+  val mapDistanceJoin = Map( //:Map[Int, List[String]] = Map[Int, List[String]]()
+    1 -> List(arealmFileLocation, edgesFileLocation, "n", "arealm", "edges","select 1 from arealm join edges on ST_DISTANCE(arealm.geometry, edges.geometry)"),
+    2 -> List(areawaterFileLocation, pointlmFileLocation, "y", "areawater", "pointlm", "select 1 from areawater join pointlm on ST_DWITHIN(areawater.geometry, pointlm.geometry, 1)")
+  )
+
+  def runRangeQuery(sedona: SparkSession, QueryInfo: List[String], HotRunTimes: Int): Unit ={
+    var buildRDD = new SpatialRDD[Geometry]()
+    var probeRDD = new SpatialRDD[Geometry]()
+
+    buildRDD = ShapefileReader.readToGeometryRDD(sedona.sparkContext, QueryInfo.head)
+    probeRDD = ShapefileReader.readToGeometryRDD(sedona.sparkContext, QueryInfo(1))
+
+    buildRDD.analyze()
+    buildRDD.spatialPartitioning(GridType.QUADTREE)
+
+    probeRDD.analyze()
+    probeRDD.spatialPartitioning(buildRDD.getPartitioner)
+
+    val switchBuildOnPartition = true
+    var switchUseIndex = true
+    if (QueryInfo(2) != "y") {
+      switchUseIndex = false
+    }
+
+    val startIndexSetting = System.currentTimeMillis()
+    buildRDD.buildIndex(IndexType.QUADTREE, switchBuildOnPartition)
+    buildRDD.indexedRDD = buildRDD.indexedRDD.cache()
+    val endIndexSetting = System.currentTimeMillis()
+    val timeIndexSetting = endIndexSetting - startIndexSetting
+
+    val buildRDD_df = Adapter.toDf(buildRDD, sedona)
+    val probeRDD_df = Adapter.toDf(probeRDD, sedona)
+    println(s"Binding name ${QueryInfo(3)}")
+    buildRDD_df.createOrReplaceTempView(QueryInfo(3))
+    println(s"Binding name ${QueryInfo(4)}")
+    probeRDD_df.createOrReplaceTempView(QueryInfo(4))
+
+    // Cold Run
+    val startCold = System.currentTimeMillis()
+    val resDFCold = sedona.sql(QueryInfo.last)
+    val resCntCold = resDFCold.count()
+    val endCold = System.currentTimeMillis()
+    val timeCold= endCold - startCold
+
+    // Hod Run
+    val listTimeHotRun = new ListBuffer[Long]()
+    val listResultHotRun = new ListBuffer[Long]()
+    val sumTimeHotRun = 0.0
+    for (n <- List.range(0, HotRunTimes)) {
+      val startHot = System.currentTimeMillis()
+      println(s"Run $n: Hot Start $startHot")
+
+      // Query
+      val resHot = sedona.sql(QueryInfo.last)
+      listResultHotRun += resHot.count()
+
+      val endHot = System.currentTimeMillis()
+      println(s"Run $n: Hot End $endHot")
+      val timeHot= endHot - startHot
+      listTimeHotRun += timeHot
+
+      //sumTimeHotRun = sumTimeHotRun + timeHot
+    }
+    val sumTime = listTimeHotRun.sum
+    val avgHotTime = sumTime / HotRunTimes
+
+
+    val strTag = "$$RESULT$$  "
+    println(s"$strTag  User Defined Hot Run Times: $HotRunTimes\n")
+    println(s"$strTag  IndexSetting Time: ${timeIndexSetting}")
     println(s"$strTag  Cold Run Time: ${timeCold}")
 
     println(s"")

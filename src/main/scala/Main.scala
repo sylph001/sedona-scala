@@ -18,7 +18,7 @@
  */
 
 import RddExample.{calculateSpatialColocation, visualizeSpatialColocation}
-import TigerRddExample.{runTigerQuery}
+import TigerRddExample.{runTigerQuery, runRangeQuery}
 import SqlExample._
 import VizExample._
 import org.apache.log4j.{Level, Logger}
@@ -49,10 +49,17 @@ object Main extends App {
   }
   */
 
+  /*
   val queryNum = args(0).toInt
   println(s"Query Num: ${queryNum}")
   println(s"Query to Run: ${TigerRddExample.mapQueries(queryNum)}")
-  runTigerQuery(sedona, TigerRddExample.mapQueries(queryNum), 2)
+  runTigerQuery(sedona, TigerRddExample.mapQueries(queryNum), 1)
   System.out.println("All SedonaSQL DEMOs passed!")
+   */
+
+  val reslist = TigerRddExample.mapDistanceJoin(2)
+  println(s"QUERY TO RUN: ${reslist}")
+  runRangeQuery(sedona, reslist, 1)
+  println("All SedonaSQL DEMOs passed!")
 
 }
