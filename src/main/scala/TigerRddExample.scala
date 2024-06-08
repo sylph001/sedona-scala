@@ -51,9 +51,9 @@ object TigerRddExample {
 
   // Tiger Dataset
   //val arealmFileLocation = resourceFolder+"tiger/arealm"
-  //val arealWaterFileLocation = resourceFolder+"tiger/areawater"
+  //val areaWaterFileLocation = resourceFolder+"tiger/areawater"
   val arealmFileLocation = "hdfs://9fcebbf32068:/home/sedona/tiger/shp/arealm"
-  val arealWaterFileLocation = "hdfs://9fcebbf32068:/home/sedona/tiger/shp/areawater"
+  val areaWaterFileLocation = "hdfs://9fcebbf32068:/home/sedona/tiger/shp/areawater"
   val edgesFileLocation = "hdfs://9fcebbf32068:/home/sedona/tiger/shp/edges"
   val pointlmFileLocation = "hdfs://9fcebbf32068:/home/sedona/tiger/shp/pointlm"
   // OSM Dataset
@@ -65,13 +65,13 @@ object TigerRddExample {
   val mapQueries = Map( //:Map[Int, List[String]] = Map[Int, List[String]]()
     // Tiger
     1 -> List(edgesFileLocation, arealmFileLocation, "INTERSECTS"),
-    2 -> List(arealmFileLocation, arealWaterFileLocation, "TOUCHES"),
+    2 -> List(arealmFileLocation, areaWaterFileLocation, "TOUCHES"),
     3 -> List(edgesFileLocation, arealmFileLocation, "CROSSES"),
     4 -> List(edgesFileLocation, edgesFileLocation, "CROSSES"),
-    5 -> List(edgesFileLocation, arealWaterFileLocation, "CROSSES"),
-    6 -> List(arealWaterFileLocation, arealWaterFileLocation, "OVERLAPS"),
+    5 -> List(edgesFileLocation, areaWaterFileLocation, "CROSSES"),
+    6 -> List(areaWaterFileLocation, areaWaterFileLocation, "OVERLAPS"),
     7 -> List(arealmFileLocation, arealmFileLocation, "OVERLAPS"),
-    8 -> List(pointlmFileLocation, arealWaterFileLocation, "WITHIN"),
+    8 -> List(pointlmFileLocation, areaWaterFileLocation, "WITHIN"),
     // OSM
     9 -> List(rds_lin_uk, bld_poly_uk, "TOUCHES"),
     10 -> List(rds_lin_uk, lwn_poly_uk, "CROSSES"),
@@ -158,7 +158,7 @@ object TigerRddExample {
 
   val mapDistanceJoin = Map( //:Map[Int, List[String]] = Map[Int, List[String]]()
     1 -> List(arealmFileLocation, edgesFileLocation, "n", "arealm", "edges","select 1 from arealm join edges on ST_DISTANCE(arealm.geometry, edges.geometry)"),
-    2 -> List(areawaterFileLocation, pointlmFileLocation, "y", "areawater", "pointlm", "select 1 from areawater join pointlm on ST_DWITHIN(areawater.geometry, pointlm.geometry, 1)")
+    2 -> List(areaWaterFileLocation, pointlmFileLocation, "y", "areawater", "pointlm", "select 1 from areawater join pointlm on ST_DWITHIN(areawater.geometry, pointlm.geometry, 1)")
   )
 
   def runRangeQuery(sedona: SparkSession, QueryInfo: List[String], HotRunTimes: Int): Unit ={

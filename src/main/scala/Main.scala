@@ -49,17 +49,17 @@ object Main extends App {
   }
   */
 
-  /*
   val queryNum = args(0).toInt
+  /*
   println(s"Query Num: ${queryNum}")
   println(s"Query to Run: ${TigerRddExample.mapQueries(queryNum)}")
   runTigerQuery(sedona, TigerRddExample.mapQueries(queryNum), 1)
   System.out.println("All SedonaSQL DEMOs passed!")
    */
 
-  val reslist = TigerRddExample.mapDistanceJoin(2)
+  val reslist = TigerRddExample.mapDistanceJoin(queryNum)
   println(s"QUERY TO RUN: ${reslist}")
-  runRangeQuery(sedona, reslist, 1)
+  runRangeQuery(sedona, reslist, 2)
   println("All SedonaSQL DEMOs passed!")
 
 }
