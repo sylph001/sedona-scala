@@ -156,25 +156,35 @@ object TigerRddExample {
     println(s"$strTag  Avg Hot Run Time: $avgHotTime")
   }
 
-  val mapDistanceJoin = Map( //:Map[Int, List[String]] = Map[Int, List[String]]()
-    1 -> List(arealmFileLocation, edgesFileLocation, "y", "arealm", "edges","select 1 from arealm join edges on ST_DISTANCE(arealm.geometry, edges.geometry)"),
-    2 -> List(areaWaterFileLocation, pointlmFileLocation, "y", "areawater", "pointlm", "select 1 from areawater join pointlm on ST_DWITHIN(areawater.geometry, pointlm.geometry, 1)"),
+  val mapQuerySQL = Map( //:Map[Int, List[String]] = Map[Int, List[String]]()
+    // Spatial Join
+    // 1 -> List(edgesFileLocation, arealmFileLocation, "INTERSECTS"),
+    2 -> List(areaWaterFileLocation, arealmFileLocation, "y", "areawater", "arealm", "select areawater.id, arealm.id from areawater join arealm on ST_TOUCHES(areawater.geometry, arealm.geometry)"),
+    3 -> List(edgesFileLocation, arealmFileLocation, "y", "edges", "arealm", "select edges.id, arealm.id from edges join arealm on ST_CROSSES(edges.geometry, arealm.geometry)"),
+    4 -> List(edgesFileLocation, edgesFileLocation, "y", "edges", "edges2", "select edges.id, edges2.id from edges join edges as edges2 on ST_CROSSES(edges.geometry, edges2.geometry)"),
+    5 -> List(edgesFileLocation, areaWaterFileLocation, "y", "edges", "areawater", "select edges.id, areawater.id from edges join areawater on ST_CROSSES(edges.geometry, areawater.geometry)"),
+    6 -> List(areaWaterFileLocation, areaWaterFileLocation, "y", "areawater", "areawater2", "select areawater.id, areawater2.id from areawater join areawater as areawater2 on ST_OVERLAPS(areawater.geometry, areawater2.geometry)"),
+    // 7 -> List(arealmFileLocation, arealmFileLocation, "OVERLAPS"),
+    8 -> List(areaWaterFileLocation, pointlmFileLocation, "select areawater.id pointlm.id, from areawater join pointlm on ST_WITHIN(areawater.geometry, pointlm.geometry)"),
+    // Range
+    9 -> List(edgesFileLocation, arealmFileLocation, "y", "edges", "arealm", "select 1 from edges join arealm on ST_DISTANCE(edges.geometry, arealm.geometry)"),
+    10 -> List(areaWaterFileLocation, pointlmFileLocation, "y", "areawater", "pointlm", "select 1 from areawater join pointlm on ST_DWITHIN(areawater.geometry, pointlm.geometry, 1)"),
     // OSM
-    9 -> List(rds_lin_uk, bld_poly_uk, "y", "rds_lin_uk", "bld_poly_uk", "select * from rds_lin_uk join bld_poly_uk on ST_TOUCHES(rds_lin_uk.geometry, bld_poly_uk.geometry)"),
-    10 -> List(lwn_poly_uk, rds_lin_uk, "y", "lwn_poly_uk", "rds_lin_uk", "select * from lwn_poly_uk join rds_lin_uk on ST_CROSSES(lwn_poly_uk.geometry, rds_lin_uk.geometry)"),
-    11 -> List(lwn_poly_uk, poi_point_uk, "y", "lwn_poly_uk", "poi_point_uk", "select * from lwn_poly_uk join poi_point_uk on ST_WITHIN(lwn_poly_uk.geometry, poi_point_uk.geometry)"),
-    12 -> List(bld_poly_uk, lwn_poly_uk, "y", "bld_poly_uk", "lwn_poly_uk", "select * from bld_poly_uk join lwn_poly_uk on ST_OVERLAPS(bld_poly_uk.geometry, lwn_poly_uk.geometry)")
+    11 -> List(bld_poly_uk, rds_lin_uk, "y", "bld_poly_uk", "rds_lin_uk", "select * from bld_poly_uk join rds_lin_uk on ST_TOUCHES(bld_poly_uk.geometry, rds_lin_uk.geometry)"),
+    12 -> List(lwn_poly_uk, rds_lin_uk, "y", "lwn_poly_uk", "rds_lin_uk", "select * from lwn_poly_uk join rds_lin_uk on ST_CROSSES(lwn_poly_uk.geometry, rds_lin_uk.geometry)"),
+    13 -> List(lwn_poly_uk, poi_point_uk, "y", "lwn_poly_uk", "poi_point_uk", "select * from lwn_poly_uk join poi_point_uk on ST_WITHIN(lwn_poly_uk.geometry, poi_point_uk.geometry)"),
+    14 -> List(bld_poly_uk, lwn_poly_uk, "y", "bld_poly_uk", "lwn_poly_uk", "select * from bld_poly_uk join lwn_poly_uk on ST_OVERLAPS(bld_poly_uk.geometry, lwn_poly_uk.geometry)")
   )
 
-  def runRangeQuery(sedona: SparkSession, QueryInfo: List[String], HotRunTimes: Int): Unit ={
+  def runQuerySQLAPI(sedona: SparkSession, QueryInfo: List[String], HotRunTimes: Int): Unit ={
     var buildRDD = new SpatialRDD[Geometry]()
     var probeRDD = new SpatialRDD[Geometry]()
 
     probeRDD = ShapefileReader.readToGeometryRDD(sedona.sparkContext, QueryInfo.head)
     buildRDD = ShapefileReader.readToGeometryRDD(sedona.sparkContext, QueryInfo(1))
 
-    buildRDD.analyze()
-    buildRDD.spatialPartitioning(GridType.QUADTREE)
+    //buildRDD.analyze()
+    //buildRDD.spatialPartitioning(GridType.QUADTREE)
 
     probeRDD.analyze()
     probeRDD.spatialPartitioning(GridType.QUADTREE) //buildRDD.getPartitioner)

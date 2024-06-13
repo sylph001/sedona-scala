@@ -18,7 +18,7 @@
  */
 
 import RddExample.{calculateSpatialColocation, visualizeSpatialColocation}
-import TigerRddExample.{runTigerQuery, runRangeQuery}
+import TigerRddExample.{runTigerQuery, runQuerySQLAPI}
 import SqlExample._
 import VizExample._
 import org.apache.log4j.{Level, Logger}
@@ -34,6 +34,7 @@ object Main extends App {
     //.master("local[*]") // Please comment out this when use it on a cluster
     //.master("spark://9fcebbf32068:7077") // Please comment out this when use it on a cluster
     .config("spark.driver.bindAddress", "0.0.0.0")
+    .config("sedona.global.index", "false")
     //.config("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName)
     .getOrCreate()
     //.config("spark.driver.host", "127.0.0.1")
@@ -58,9 +59,9 @@ object Main extends App {
   System.out.println("All SedonaSQL DEMOs passed!")
    */
 
-  val reslist = TigerRddExample.mapDistanceJoin(queryNum)
+  val reslist = TigerRddExample.mapQuerySQL(queryNum)
   println(s"QUERY TO RUN WITH SQL API: ${reslist}")
-  runRangeQuery(sedona, reslist, 1)
+  runQuerySQLAPI(sedona, reslist, 1)
   println("All SedonaSQL DEMOs passed!")
 
 }
