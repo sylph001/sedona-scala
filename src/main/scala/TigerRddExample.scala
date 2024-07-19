@@ -183,11 +183,11 @@ object TigerRddExample {
     probeRDD = ShapefileReader.readToGeometryRDD(sedona.sparkContext, QueryInfo.head)
     buildRDD = ShapefileReader.readToGeometryRDD(sedona.sparkContext, QueryInfo(1))
 
-    //buildRDD.analyze()
-    //buildRDD.spatialPartitioning(GridType.QUADTREE)
-
     probeRDD.analyze()
     probeRDD.spatialPartitioning(GridType.QUADTREE) //buildRDD.getPartitioner)
+
+    buildRDD.analyze()
+    buildRDD.spatialPartitioning(GridType.QUADTREE)
 
     val switchBuildOnPartition = true
     var switchUseIndex = true
@@ -196,10 +196,10 @@ object TigerRddExample {
     }
 
     val startIndexSetting = System.currentTimeMillis()
-    //buildRDD.buildIndex(IndexType.QUADTREE, switchBuildOnPartition)
-    //buildRDD.indexedRDD = buildRDD.indexedRDD.cache()
     probeRDD.buildIndex(IndexType.QUADTREE, switchBuildOnPartition)
     probeRDD.indexedRDD = probeRDD.indexedRDD.cache()
+    buildRDD.buildIndex(IndexType.QUADTREE, switchBuildOnPartition)
+    buildRDD.indexedRDD = buildRDD.indexedRDD.cache()
     val endIndexSetting = System.currentTimeMillis()
     val timeIndexSetting = endIndexSetting - startIndexSetting
 
@@ -216,9 +216,11 @@ object TigerRddExample {
 
     // Cold Run
     val startCold = System.currentTimeMillis()
+    println(s"Cold Run Starts: $startCold")
     val resDFCold = sedona.sql(QueryInfo.last)
     val resCntCold = resDFCold.count()
     val endCold = System.currentTimeMillis()
+    println(s"Cold Run Ends: $endCold")
     val timeCold= endCold - startCold
 
     // Hod Run
