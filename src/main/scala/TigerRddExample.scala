@@ -49,6 +49,7 @@ import java.awt.Color
 
 object TigerRddExample {
 
+  val strTag = "$$RESULT$$  "
   // Tiger Dataset
   //val arealmFileLocation = resourceFolder+"tiger/arealm"
   //val areaWaterFileLocation = resourceFolder+"tiger/areawater"
@@ -65,13 +66,13 @@ object TigerRddExample {
   val mapQueries = Map( //:Map[Int, List[String]] = Map[Int, List[String]]()
     // Tiger
     1 -> List(edgesFileLocation, arealmFileLocation, "INTERSECTS"),
-    2 -> List(arealmFileLocation, areaWaterFileLocation, "TOUCHES"),
+    2 -> List(areaWaterFileLocation, arealmFileLocation, "TOUCHES"),
     3 -> List(edgesFileLocation, arealmFileLocation, "CROSSES"),
     4 -> List(edgesFileLocation, edgesFileLocation, "CROSSES"),
     5 -> List(edgesFileLocation, areaWaterFileLocation, "CROSSES"),
     6 -> List(areaWaterFileLocation, areaWaterFileLocation, "OVERLAPS"),
     7 -> List(arealmFileLocation, arealmFileLocation, "OVERLAPS"),
-    8 -> List(pointlmFileLocation, areaWaterFileLocation, "WITHIN"),
+    8 -> List(areaWaterFileLocation, pointlmFileLocation, "WITHIN"),
     // OSM
     9 -> List(rds_lin_uk, bld_poly_uk, "TOUCHES"),
     10 -> List(rds_lin_uk, lwn_poly_uk, "CROSSES"),
@@ -109,11 +110,14 @@ object TigerRddExample {
     val startIndexSetting = System.currentTimeMillis()
     buildRDD.buildIndex(IndexType.QUADTREE, switchBuildOnPartition)
     buildRDD.indexedRDD = buildRDD.indexedRDD.cache()
+    probeRDD.buildIndex(IndexType.QUADTREE, switchBuildOnPartition)
+    probeRDD.indexedRDD = probeRDD.indexedRDD.cache()
     val endIndexSetting = System.currentTimeMillis()
     val timeIndexSetting = endIndexSetting - startIndexSetting
 
     // Cold Run
     val startCold = System.currentTimeMillis()
+    //val resCold = JoinQuery.SpatialJoinQuery(buildRDD, probeRDD, switchUseIndex, mapPredicates(QueryInfo(2)))
     val resCold = JoinQuery.SpatialJoinQuery(buildRDD, probeRDD, switchUseIndex, mapPredicates(QueryInfo(2)))
     val resultCold = resCold.count()
     val endCold = System.currentTimeMillis()
@@ -140,8 +144,6 @@ object TigerRddExample {
     val sumTime = listTimeHotRun.sum
     val avgHotTime = sumTime / HotRunTimes
 
-
-    val strTag = "$$RESULT$$  "
     println(s"$strTag  User Defined Hot Run Times: $HotRunTimes\n")
     println(s"$strTag  IndexSetting Time: ${timeIndexSetting}")
     println(s"$strTag  Cold Run Result: ${resultCold}")
@@ -199,6 +201,7 @@ object TigerRddExample {
     probeRDD.buildIndex(IndexType.QUADTREE, switchBuildOnPartition)
     probeRDD.indexedRDD = probeRDD.indexedRDD.cache()
     buildRDD.buildIndex(IndexType.QUADTREE, switchBuildOnPartition)
+    //buildRDD.buildIndex(IndexType.QUADTREE, false) // Test non-index on smaller side
     buildRDD.indexedRDD = buildRDD.indexedRDD.cache()
     val endIndexSetting = System.currentTimeMillis()
     val timeIndexSetting = endIndexSetting - startIndexSetting
@@ -209,18 +212,18 @@ object TigerRddExample {
     // Repartition
     val probeRDD_repartition_df = probeRDD_df.repartition(1000)
 
-    println(s"Binding name ${QueryInfo(3)}")
+    println(s"$strTag Binding name ${QueryInfo(3)}")
     probeRDD_df.createOrReplaceTempView(QueryInfo(3))
-    println(s"Binding name ${QueryInfo(4)}")
+    println(s"$strTag Binding name ${QueryInfo(4)}")
     buildRDD_df.createOrReplaceTempView(QueryInfo(4))
 
     // Cold Run
     val startCold = System.currentTimeMillis()
-    println(s"Cold Run Starts: $startCold")
+    println(s"$strTag Cold Run Starts: $startCold")
     val resDFCold = sedona.sql(QueryInfo.last)
     val resCntCold = resDFCold.count()
     val endCold = System.currentTimeMillis()
-    println(s"Cold Run Ends: $endCold")
+    println(s"$strTag Cold Run Ends: $endCold")
     val timeCold= endCold - startCold
 
     // Hod Run
@@ -229,14 +232,14 @@ object TigerRddExample {
     val sumTimeHotRun = 0.0
     for (n <- List.range(0, HotRunTimes)) {
       val startHot = System.currentTimeMillis()
-      println(s"Run $n: Hot Start $startHot")
+      println(s"$strTag Run $n: Hot Start $startHot")
 
       // Query
       val resHot = sedona.sql(QueryInfo.last)
       listResultHotRun += resHot.count()
 
       val endHot = System.currentTimeMillis()
-      println(s"Run $n: Hot End $endHot")
+      println(s"$strTag Run $n: Hot End $endHot")
       val timeHot= endHot - startHot
       listTimeHotRun += timeHot
 
@@ -245,8 +248,6 @@ object TigerRddExample {
     val sumTime = listTimeHotRun.sum
     val avgHotTime = sumTime / HotRunTimes
 
-
-    val strTag = "$$RESULT$$  "
     println(s"$strTag  User Defined Hot Run Times: $HotRunTimes\n")
     println(s"$strTag  IndexSetting Time: ${timeIndexSetting}")
     println(s"$strTag  Cold Run Time: ${timeCold}")

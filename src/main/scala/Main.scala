@@ -34,7 +34,8 @@ object Main extends App {
     //.master("local[*]") // Please comment out this when use it on a cluster
     //.master("spark://9fcebbf32068:7077") // Please comment out this when use it on a cluster
     .config("spark.driver.bindAddress", "0.0.0.0")
-    .config("sedona.global.index", "false")
+    //.config("sedona.global.index", "false")
+    .config("sedona.global.index", "true") // test switch on
     //.config("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName)
     .getOrCreate()
     //.config("spark.driver.host", "127.0.0.1")
@@ -51,6 +52,8 @@ object Main extends App {
   */
 
   val queryNum = args(0).toInt
+  val apiNum = args(1).toInt
+  val runTimes = args(2).toInt
 
   /*
   println(s"Query Num: ${queryNum}")
@@ -59,9 +62,18 @@ object Main extends App {
   System.out.println("All SedonaSQL DEMOs passed!")
    */
 
-  val reslist = TigerRddExample.mapQuerySQL(queryNum)
-  println(s"QUERY TO RUN WITH SQL API: ${reslist}")
-  runQuerySQLAPI(sedona, reslist, 1)
-  println("All SedonaSQL DEMOs passed!")
+  val strTag = "$$RESULT$$  "
+  val queryInfo = TigerRddExample.mapQuerySQL(queryNum)
+  println(s"${strTag}QUERY TO RUN WITH SQL API: ${queryInfo}")
+  println(s"${strTag}Using API: ${apiNum}")
+  println(s"${strTag}Will Run Hot for ${runTimes} times")
+  if (apiNum==1) { 
+    runTigerQuery(sedona,queryInfo,runTimes)
+  } else if (apiNum==2) {
+    runQuerySQLAPI(sedona, queryInfo, runTimes)
+  } else {
+    println(s"${strTag}Unknown API Name!")
+  }
+  println("${strTag}All SedonaSQL DEMOs done!")
 
 }
