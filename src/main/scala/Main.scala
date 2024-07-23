@@ -63,13 +63,16 @@ object Main extends App {
    */
 
   val strTag = "$$RESULT$$  "
-  val queryInfo = TigerRddExample.mapQuerySQL(queryNum)
-  println(s"${strTag}QUERY TO RUN WITH SQL API: ${queryInfo}")
+  println(s"${strTag}Query Number: ${queryNum}")
   println(s"${strTag}Using API: ${apiNum}")
   println(s"${strTag}Will Run Hot for ${runTimes} times")
   if (apiNum==1) { 
+    val queryInfo = TigerRddExample.mapQueries(queryNum)
+    println(s"${strTag}QUERY TO RUN WITH SQL API: ${queryInfo}")
     runTigerQuery(sedona,queryInfo,runTimes)
   } else if (apiNum==2) {
+    val queryInfo = TigerRddExample.mapQuerySQL(queryNum)
+    println(s"${strTag}QUERY TO RUN WITH SQL API: ${queryInfo}")
     runQuerySQLAPI(sedona, queryInfo, runTimes)
   } else {
     println(s"${strTag}Unknown API Name!")
