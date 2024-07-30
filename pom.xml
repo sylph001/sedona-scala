@@ -193,6 +193,39 @@
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
+	<!-- for slf4j loading error
+	<dependency> 
+		<groupId>org.slf4j</groupId> 
+		<artifactId>slf4j-api</artifactId> 
+		<version>2.0.13</version>
+	</dependency>
+	<dependency> 
+		<groupId>org.slf4j</groupId> 
+		<artifactId>slf4j-simple</artifactId> 
+		<version>2.0.13</version> 
+        </dependency>
+	<dependency> 
+                <groupId>org.slf4j</groupId> 
+                <artifactId>slf4j2-impl</artifactId> 
+                <version>2.19.0</version>
+	</dependency>
+	<dependency>
+		<groupId>org.slf4j</groupId>
+		<artifactId>slf4j-api</artifactId>
+		<version>2.0.6</version>
+	</dependency>
+	<dependency> 
+                <groupId>org.apache.logging.log4j</groupId> 
+                <artifactId>log4j-slf4j2-impl</artifactId> 
+                <version>2.19.0</version>
+	</dependency>
+	<dependency> 
+		<groupId>org.slf4j</groupId> 
+		<artifactId>slf4j-nop</artifactId> 
+		<version>2.0.3</version> 
+		<scope>test</scope> 
+	</dependency>
+	-->
     </dependencies>
     <repositories>
         <repository>

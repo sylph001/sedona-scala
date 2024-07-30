@@ -1,3 +1,20 @@
+# API choices:
+# 1 - RDD
+# 2 - sql
+apiName="
+2
+"
+runTimes=2
+
+TOTAL_LIST="
+10
+9
+"
+#2
+#6
+#8
+#3
+#4
 
 TIGER_LIST="
 7
@@ -12,8 +29,8 @@ TIGER_LIST="
 
 OSM_LIST="
 10
-11
 "
+#11
 #12 - 2nd largest
 #9  - 1st largest
 
@@ -45,28 +62,59 @@ OSM_LIST="
 
 ##### 6 Nodes ####9
 
+: '
 # SPARK Config
-/home/hadoop/deploy/spark_stop_workers.sh 2 # Previous run was 4-Nodes, so use "4" here
+# Stop Spark
+/home/hadoop/deploy/spark_stop_workers.sh 2 # Previous run was 2-Nodes, so use "2" here
 sleep 5
 res=`/opt/spark/sbin/stop-master.sh`
 echo "Stop master exiting: $res"
+# Replace Spark Worker files
 cp /opt/spark/conf/workers-6 /opt/spark/conf/workers
+
+# Hadoop Config
+su -c 'stop-yarn.sh' - hadoop
+sleep 5
+su -c 'stop-dfs.sh' - hadoop
+su -c 'cd /home/hadoop/hadoop/hadoop-3.3.6/etc/hadoop && cp workers-6 workers' -hadoop
+sleep 8
+su -c 'stop-dfs.sh' - hadoop
+sleep 5
+su -c 'stop-yarn.sh' - hadoop
 sleep 10
+
+# Restart Spark
 res=`/opt/spark/sbin/start-master.sh`
 echo "Start master exiting: $res"
 sleep 5
 /home/hadoop/deploy/spark_start_workers.sh 6
 sleep 5
+'
 
 # Run Query
-for queryNum in $OSM_LIST; do
-	echo "Running Query [$queryNum]..."
-	/opt/spark/bin/spark-submit --driver-memory 6g --executor-memory 8g target/sedona-spark-example-1.6.0.jar $queryNum >log-$queryNum-6 2>&1
-	echo "Query done"
-	sleep 10
+for queryNum in $TOTAL_LIST; do
+	for API in $apiName; do
+		echo "Running Query [$queryNum] with API [$API]..."
+		DateTime=`date +%Y%m%d_%H%M%S`
+		/opt/spark/bin/spark-submit \
+			--master yarn \
+			--deploy-mode client \
+			--conf "spark.dynamicAllocation.enabled=true" \
+			--conf "spark.dynamicAllocation.shuffleTracking.enabled=true" \
+			--conf "spark.locality.wait.node=0" \
+			--conf "spark.executor.instances=6" \
+			--conf "spark.executor.cores=4" \
+			--conf "spark.dynamicAllocation.executorIdleTimeout=3000" \
+			--conf "spark.dynamicAllocation.minExecutors=2" \
+			--conf "spark.scheduler.mode=FAIR" \
+			--num-executors 2 \
+			--driver-memory 6g --executor-memory 4g target/sedona-spark-example-1.6.0.jar $queryNum $API $runTimes >log-$queryNum-$1-$DateTime 2>&1
+		echo "Query done"
+		sleep 5
+	done
 done
 
-
+: '
 ##### 4 Nodes ####
 
 # SPARK Config
@@ -87,7 +135,7 @@ for queryNum in $OSM_LIST; do
 	echo "Running Query [$queryNum]..."
 	/opt/spark/bin/spark-submit --driver-memory 6g --executor-memory 8g target/sedona-spark-example-1.6.0.jar $queryNum >log-$queryNum-4 2>&1
 	echo "Query done"
-	sleep 10
+	sleep 5
 done
 
 
@@ -111,7 +159,9 @@ for queryNum in $OSM_LIST; do
 	echo "Running Query [$queryNum]..."
 	/opt/spark/bin/spark-submit --driver-memory 6g --executor-memory 8g target/sedona-spark-example-1.6.0.jar $queryNum >log-$queryNum-2 2>&1
 	echo "Query done"
-	sleep 10
+	sleep 5
 done
 
 echo "ALL TESTS DONE"
+'
+			#--conf "yarn.log-aggregation-enable=true" \

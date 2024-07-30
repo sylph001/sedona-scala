@@ -30,7 +30,8 @@ start_on_local() {
 
 start_remote() {
 	echo "Starting worker on Host: $1..."
-	ssh -o StrictHostKeyChecking=no ${RemoteUser}@$1 "/opt/spark/sbin/start-worker.sh spark://9fcebbf32068:7077"
+	ssh -o StrictHostKeyChecking=no $1 "/opt/spark/sbin/start-worker.sh spark://9fcebbf32068:7077"
+	#ssh -o StrictHostKeyChecking=no ${RemoteUser}@$1 "/opt/spark/sbin/start-worker.sh spark://9fcebbf32068:7077"
 	echo "Done"
 }
 

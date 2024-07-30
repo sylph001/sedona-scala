@@ -44,7 +44,8 @@ sleep 5
 # Run Query
 for queryNum in $RANGE_LIST; do
 	echo "Running Query [$queryNum]..."
-	/opt/spark/bin/spark-submit --driver-memory 6g --executor-memory 8g target/sedona-spark-example-1.6.0.jar $queryNum >log_range/log-$queryNum-6 2>&1
+	DateTime=`date +%Y%m%d_%H%M%S`
+	/opt/spark/bin/spark-submit --driver-memory 6g --executor-memory 8g target/sedona-spark-example-1.6.0.jar $queryNum >log_range/log-$queryNum-6-$DateTime 2>&1
 	echo "Query done"
 	sleep 10
 done
@@ -68,7 +69,8 @@ sleep 5
 # Run Query
 for queryNum in $RANGE_LIST; do
 	echo "Running Query [$queryNum]..."
-	/opt/spark/bin/spark-submit --driver-memory 6g --executor-memory 8g target/sedona-spark-example-1.6.0.jar $queryNum >log_range/log-$queryNum-4 2>&1
+	DateTime=`date +%Y%m%d_%H%M%S`
+	/opt/spark/bin/spark-submit --driver-memory 6g --executor-memory 8g target/sedona-spark-example-1.6.0.jar $queryNum >log_range/log-$queryNum-4-$DateTime 2>&1
 	echo "Query done"
 	sleep 10
 done
@@ -92,7 +94,8 @@ sleep 5
 # Run Query
 for queryNum in $RANGE_LIST; do
 	echo "Running Query [$queryNum]..."
-	/opt/spark/bin/spark-submit --driver-memory 6g --executor-memory 8g target/sedona-spark-example-1.6.0.jar $queryNum >log_range/log-$queryNum-2 2>&1
+	DateTime=`date +%Y%m%d_%H%M%S`
+	/opt/spark/bin/spark-submit --driver-memory 6g --executor-memory 8g target/sedona-spark-example-1.6.0.jar $queryNum >log_range/log-$queryNum-2-$DateTime 2>&1
 	echo "Query done"
 	sleep 10
 done

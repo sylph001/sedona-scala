@@ -33,10 +33,16 @@ object Main extends App {
   val config = SedonaContext.builder().appName("SedonaSQL-demo")
     //.master("local[*]") // Please comment out this when use it on a cluster
     //.master("spark://9fcebbf32068:7077") // Please comment out this when use it on a cluster
-    .config("spark.driver.bindAddress", "0.0.0.0")
+    //.config("spark.driver.bindAddress", "0.0.0.0")
     //.config("sedona.global.index", "false")
     .config("sedona.global.index", "true") // test switch on
     //.config("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName)
+    // -XZ
+    //.config("sedona.join.autoBroadcastJoinThreshold","-1")
+    //.config("spark.dynamicAllocation.enabled","true")
+    //.config("spark.dynamicAllocation.shuffleTracking.enabled","true")
+    //.config("spark.locality.wait.node","0")
+    //.config("spark.scheduler.mode","FAIR")
     .getOrCreate()
     //.config("spark.driver.host", "127.0.0.1")
   val sedona = SedonaContext.create(config)

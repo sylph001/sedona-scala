@@ -167,10 +167,10 @@ object TigerRddExample {
     5 -> List(edgesFileLocation, areaWaterFileLocation, "y", "edges", "areawater", "select edges.id, areawater.id from edges join areawater on ST_CROSSES(edges.geometry, areawater.geometry)"),
     6 -> List(areaWaterFileLocation, areaWaterFileLocation, "y", "areawater", "areawater2", "select areawater.id, areawater2.id from areawater join areawater as areawater2 on ST_OVERLAPS(areawater.geometry, areawater2.geometry)"),
     // 7 -> List(arealmFileLocation, arealmFileLocation, "OVERLAPS"),
-    8 -> List(areaWaterFileLocation, pointlmFileLocation, "select areawater.id pointlm.id, from areawater join pointlm on ST_WITHIN(areawater.geometry, pointlm.geometry)"),
+    8 -> List(areaWaterFileLocation, pointlmFileLocation, "y", "areawater", "pointlm", "select areawater.id, pointlm.id from areawater join pointlm on ST_WITHIN(areawater.geometry, pointlm.geometry)"),
     // Range
-    9 -> List(edgesFileLocation, arealmFileLocation, "y", "edges", "arealm", "select 1 from edges join arealm on ST_DISTANCE(edges.geometry, arealm.geometry)"),
-    10 -> List(areaWaterFileLocation, pointlmFileLocation, "y", "areawater", "pointlm", "select 1 from areawater join pointlm on ST_DWITHIN(areawater.geometry, pointlm.geometry, 1)"),
+    9 -> List(areaWaterFileLocation, pointlmFileLocation, "y", "areawater", "pointlm", "select 1 from areawater join pointlm on ST_DWITHIN(areawater.geometry, pointlm.geometry, 1)"),
+    10 -> List(areaWaterFileLocation, pointlmFileLocation, "y", "areawater", "pointlm", "select 1 from areawater join pointlm on ST_DISTANCE(areawater.geometry, pointlm.geometry) >= 1"),
     // OSM
     11 -> List(bld_poly_uk, rds_lin_uk, "y", "bld_poly_uk", "rds_lin_uk", "select * from bld_poly_uk join rds_lin_uk on ST_TOUCHES(bld_poly_uk.geometry, rds_lin_uk.geometry)"),
     12 -> List(lwn_poly_uk, rds_lin_uk, "y", "lwn_poly_uk", "rds_lin_uk", "select * from lwn_poly_uk join rds_lin_uk on ST_CROSSES(lwn_poly_uk.geometry, rds_lin_uk.geometry)"),
@@ -185,11 +185,11 @@ object TigerRddExample {
     probeRDD = ShapefileReader.readToGeometryRDD(sedona.sparkContext, QueryInfo.head)
     buildRDD = ShapefileReader.readToGeometryRDD(sedona.sparkContext, QueryInfo(1))
 
-    probeRDD.analyze()
-    probeRDD.spatialPartitioning(GridType.QUADTREE) //buildRDD.getPartitioner)
+    //probeRDD.analyze()
+    //probeRDD.spatialPartitioning(GridType.QUADTREE) //buildRDD.getPartitioner)
 
-    buildRDD.analyze()
-    buildRDD.spatialPartitioning(GridType.QUADTREE)
+    //buildRDD.analyze()
+    //buildRDD.spatialPartitioning(GridType.QUADTREE)
 
     val switchBuildOnPartition = true
     var switchUseIndex = true
@@ -198,11 +198,11 @@ object TigerRddExample {
     }
 
     val startIndexSetting = System.currentTimeMillis()
-    probeRDD.buildIndex(IndexType.QUADTREE, switchBuildOnPartition)
-    probeRDD.indexedRDD = probeRDD.indexedRDD.cache()
-    buildRDD.buildIndex(IndexType.QUADTREE, switchBuildOnPartition)
+    //probeRDD.buildIndex(IndexType.QUADTREE, switchBuildOnPartition)
+    //probeRDD.indexedRDD = probeRDD.indexedRDD.cache()
+    //buildRDD.buildIndex(IndexType.QUADTREE, switchBuildOnPartition)
     //buildRDD.buildIndex(IndexType.QUADTREE, false) // Test non-index on smaller side
-    buildRDD.indexedRDD = buildRDD.indexedRDD.cache()
+    //buildRDD.indexedRDD = buildRDD.indexedRDD.cache()
     val endIndexSetting = System.currentTimeMillis()
     val timeIndexSetting = endIndexSetting - startIndexSetting
 
@@ -211,11 +211,12 @@ object TigerRddExample {
 
     // Repartition
     val probeRDD_repartition_df = probeRDD_df.repartition(1000)
+    val buildRDD_repartition_df = buildRDD_df.repartition(100)
 
     println(s"$strTag Binding name ${QueryInfo(3)}")
-    probeRDD_df.createOrReplaceTempView(QueryInfo(3))
+    probeRDD_repartition_df.createOrReplaceTempView(QueryInfo(3))
     println(s"$strTag Binding name ${QueryInfo(4)}")
-    buildRDD_df.createOrReplaceTempView(QueryInfo(4))
+    buildRDD_repartition_df.createOrReplaceTempView(QueryInfo(4))
 
     // Cold Run
     val startCold = System.currentTimeMillis()

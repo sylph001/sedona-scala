@@ -30,7 +30,8 @@ stop_on_local() {
 
 stop_remote() {
 	echo "Stopping worker on Host: $1..."
-	ssh -o StrictHostKeyChecking=no ${RemoteUser}@$1 "/opt/spark/sbin/stop-worker.sh"
+	ssh -o StrictHostKeyChecking=no $1 "/opt/spark/sbin/stop-worker.sh"
+	#ssh -o StrictHostKeyChecking=no ${RemoteUser}@$1 "/opt/spark/sbin/stop-worker.sh"
 	echo "Done"
 }
 
