@@ -7,14 +7,19 @@ apiName="
 runTimes=2
 
 TOTAL_LIST="
-10
+8
+3
+4
 9
+10
 "
 #2
 #6
 #8
 #3
 #4
+#9
+#10
 
 TIGER_LIST="
 7
@@ -102,12 +107,12 @@ for queryNum in $TOTAL_LIST; do
 			--conf "spark.dynamicAllocation.enabled=true" \
 			--conf "spark.dynamicAllocation.shuffleTracking.enabled=true" \
 			--conf "spark.locality.wait.node=0" \
-			--conf "spark.executor.instances=6" \
+			--conf "spark.executor.instances=36" \
 			--conf "spark.executor.cores=4" \
 			--conf "spark.dynamicAllocation.executorIdleTimeout=3000" \
-			--conf "spark.dynamicAllocation.minExecutors=2" \
+			--conf "spark.dynamicAllocation.minExecutors=12" \
 			--conf "spark.scheduler.mode=FAIR" \
-			--num-executors 2 \
+			--num-executors 12 \
 			--driver-memory 6g --executor-memory 4g target/sedona-spark-example-1.6.0.jar $queryNum $API $runTimes >log-$queryNum-$1-$DateTime 2>&1
 		echo "Query done"
 		sleep 5

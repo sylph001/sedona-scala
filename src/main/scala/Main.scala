@@ -36,6 +36,8 @@ object Main extends App {
     //.config("spark.driver.bindAddress", "0.0.0.0")
     //.config("sedona.global.index", "false")
     .config("sedona.global.index", "true") // test switch on
+    .config("sedona.global.indextype", "quadtree")
+    .config("sedona.join.gridtype", "quadtree")
     //.config("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName)
     // -XZ
     //.config("sedona.join.autoBroadcastJoinThreshold","-1")
